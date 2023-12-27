@@ -1,7 +1,7 @@
 {
   "type": "module",
   "name": "grapesjs-float",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "GrapesJS float plugin",
   "author": "Benjamin Grand",
   "license": "BSD-3-Clause",
