@@ -5,7 +5,7 @@
 ## Installation
 
 ```shell
-npm install grapesjs grapesjs-float
+npm install grapesjs grapesjs-float @floating-ui/dom
 ```
 
 ## Usage
