@@ -58,7 +58,7 @@ const commandOptions = {
   floatingElement: HTMLElement, // required, your floating html element ("display: none;", v-show, etc.)
   referenceElement: HTMLElement // optional, selected component by default
 }
-editor.run('float:show-element', commandOptions)
+editor.runCommand('float:show-element', commandOptions)
 ```
 
 ### Hide floating element
@@ -68,7 +68,7 @@ const commandOptions = {
   floatingElement: HTMLElement, // optional, your floating html element ("display: none;", v-show, etc.)
   referenceElement: HTMLElement // optional, selected component by default
 }
-editor.run('float:hide-element', commandOptions)
+editor.runCommand('float:hide-element', commandOptions)
 ```
 
 ## Options
