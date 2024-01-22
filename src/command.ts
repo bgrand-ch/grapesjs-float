@@ -1,4 +1,4 @@
-import { logScope } from './utils/constant'
+import { logScope, showFloatingCommand, hideFloatingCommand } from './utils/constant'
 import { showFloatingElement, hideFloatingElement } from './utils/floating'
 import { getSelectedElement, getFloatingElement } from './utils/element'
 
@@ -52,6 +52,8 @@ export function onShowFloatingElement (editor: Editor, sender: unknown, options:
     if (options.floatingElement) {
       floatingElementManager.set(selectedElement, floatingElement)
     }
+
+    editor.trigger(showFloatingCommand, floatingElement, selectedElement, previousElement)
   } catch (err) {
     const { message } = err as Error
     console.warn(`${logScope} onShowFloatingElement - ${message}`)
@@ -93,6 +95,8 @@ export function onHideFloatingElement (editor: Editor, sender: unknown, options:
     if (options.floatingElement) {
       floatingElementManager.delete(selectedElement)
     }
+
+    editor.trigger(hideFloatingCommand, floatingElement, selectedElement, previousElement)
   } catch (err) {
     const { message } = err as Error
     console.warn(`${logScope} onHideFloatingElement - ${message}`)
