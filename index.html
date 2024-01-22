@@ -1,3 +1,7 @@
+<!-- This file is only used by Vite during development. -->
+<!-- It is ignored when the files are built. -->
+<!-- It is an example, a demonstration. -->
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -7,12 +11,23 @@
   </head>
   <body>
     <div id="editor">
-      <div data-gjs-type="text" style="max-width: 600px;">
+      <div data-gjs-type="text" style="max-width: 400px;">
+        Insert your text here
+      </div>
+
+      <div data-gjs-type="text" style="max-width: 800px;">
+        Insert your text here
+      </div>
+
+      <div data-gjs-type="text" style="max-width: 1200px;">
         Insert your text here
       </div>
     </div>
-    <div id="element" style="display: none;"></div>
+
+    <div id="floating-element"></div>
+
     <script type="module" src="/src/example.ts"></script>
+
     <style>
       html, body {
         margin: 0;
@@ -22,10 +37,13 @@
         font: inherit;
         vertical-align: baseline;
       }
+
       body {
         line-height: 1;
       }
-      #element {
+
+      #floating-element {
+        display: none;
         padding: 8px;
         border-radius: 4px;
         background-color: white;
