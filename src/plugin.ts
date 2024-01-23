@@ -1,4 +1,4 @@
-import { showFloatingCommand, hideFloatingCommand } from './utils/constant'
+import { logScope, showFloatingCommand, hideFloatingCommand } from './utils/constant'
 import { onShowFloatingElement, onHideFloatingElement } from './command'
 import { updateFloatingPosition, showFloatingElement, hideFloatingElement } from './utils/floating'
 
@@ -6,7 +6,7 @@ import type { Plugin, Component } from 'grapesjs'
 import type { PluginOptions, CommandOptions } from './types'
 
 const plugin: Plugin<PluginOptions> = (editor, options = {}) => {
-  const { hasSelectionTracked = true } = options
+  const { hasSelectionTracked = false, floatingElement } = options
   const editorCommands = editor.Commands
 
   editorCommands.add(showFloatingCommand, onShowFloatingElement(options))
@@ -16,30 +16,40 @@ const plugin: Plugin<PluginOptions> = (editor, options = {}) => {
     return
   }
 
-  // editor.on('component:selected', (selectedComponent: Component) => {
+  if (!floatingElement) {
+    console.warn(`${logScope} "floatingElement" is required to track selection`)
+    return
+  }
 
-  // })
+  editor.on('component:selected', (selectedComponent: Component) => {
+    const selectedEl = selectedComponent.getEl()
 
-  // editor.on('component:deselected', (deselectedComponent: Component) => {
-  //   const timeoutId = window.setTimeout(() => {
-  //     try {
-  //       const previousElement = deselectedComponent.getEl()
+    if (!selectedEl) {
+      return
+    }
 
-  //       if (!previousElement) {
-  //         return
-  //       }
+    const commandOptions: CommandOptions = {
+      referenceElement: selectedEl,
+      floatingElement
+    }
 
-  //       const commandOptions: CommandOptions = {
-  //         previousElement,
-  //         isDebugging: true
-  //       }
+    editor.runCommand(showFloatingCommand, commandOptions)
+  })
 
-  //       editorCommands.run(showFloatingCommand, commandOptions)
-  //     } finally {
-  //       window.clearTimeout(timeoutId)
-  //     }
-  //   }, 250)
-  // })
+  editor.on('component:deselected', (deselectedComponent: Component) => {
+    const deselectedEl = deselectedComponent.getEl()
+
+    if (!deselectedEl) {
+      return
+    }
+
+    const commandOptions: CommandOptions = {
+      referenceElement: deselectedEl,
+      floatingElement
+    }
+  
+    editor.runCommand(hideFloatingCommand, commandOptions)
+  })
 }
 
 export default plugin

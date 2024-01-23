@@ -17,7 +17,8 @@ import grapesjs from 'grapesjs'
 import grapesjsFloat from 'grapesjs-float'
 
 const pluginOptions = {
-  hasSelectionTracked: boolean // optional, default to true
+  hasSelectionTracked: boolean, // optional, default to false
+  floatingElement: HTMLElement // optional, if specified in "float:show-element" command options
 }
 const editor = grapesjs.init({
   // ...
@@ -38,7 +39,8 @@ import grapesjs, { usePlugin } from 'grapesjs'
 import grapesjsFloat from 'grapesjs-float'
 
 const pluginOptions = {
-  hasSelectionTracked: boolean // default to true
+  hasSelectionTracked: boolean, // optional, default to false
+  floatingElement: HTMLElement // optional, if specified in "float:show-element" command options
 }
 const editor = grapesjs.init({
   // ...
@@ -55,8 +57,8 @@ const editor = grapesjs.init({
 
 ```ts
 const commandOptions = {
-  floatingElement: HTMLElement, // required, your floating html element ("display: none;", v-show, etc.)
-  referenceElement: HTMLElement // optional, selected component by default
+  referenceElement: HTMLElement, // optional, selected component by default
+  floatingElement: HTMLElement // optional, if specified in the plugin options
 }
 editor.runCommand('float:show-element', commandOptions)
 ```
@@ -65,10 +67,39 @@ editor.runCommand('float:show-element', commandOptions)
 
 ```ts
 const commandOptions = {
-  floatingElement: HTMLElement, // optional, your floating html element ("display: none;", v-show, etc.)
-  referenceElement: HTMLElement // optional, selected component by default
+  referenceElement: HTMLElement, // optional, selected component by default
+  floatingElement: HTMLElement // optional, your floating html element by default
 }
 editor.runCommand('float:hide-element', commandOptions)
+```
+
+## Events
+
+```ts
+// Your floating HTML element.
+const floatingEl = document.getElementById('floating-element')
+```
+
+### On floating element shown
+
+```ts
+editor.on('float:show-element', (floatingElement, referenceElement) => {
+  console.log('Floating element is shown', {
+    floatingElement,
+    referenceElement
+  })
+})
+```
+
+### On floating element hidden
+
+```ts
+editor.on('float:hide-element', (floatingElement, referenceElement) => {
+  console.log('Floating element is hidden', {
+    floatingElement,
+    referenceElement
+  })
+})
 ```
 
 ## Options
@@ -76,7 +107,8 @@ editor.runCommand('float:hide-element', commandOptions)
 ```ts
 {
   // Floating element reference updated when a component is selected.
-  hasSelectionTracked: boolean // optional, default to true
+  hasSelectionTracked: boolean, // optional, default to false
+  floatingElement: HTMLElement // optional, if specified in "float:show-element" command options
 }
 ```
 

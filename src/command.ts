@@ -22,16 +22,16 @@ export function onShowFloatingElement (pluginOptions: PluginOptions) {
         })
       }
 
-      const floatingElement = options.floatingElement || pluginOptions.floatingElement
-  
-      if (!floatingElement) {
-        throw new Error('"floatingElement" is required')
-      }
-  
       const referenceElement = options.referenceElement || getSelectedElement(editor)
   
       if (!referenceElement) {
         throw new Error('"referenceElement" is empty')
+      }
+
+      const floatingElement = options.floatingElement || pluginOptions.floatingElement
+  
+      if (!floatingElement) {
+        throw new Error('"floatingElement" is required')
       }
   
       const currStopAutoUpdate = autoUpdateManager.get(referenceElement)
@@ -71,16 +71,17 @@ export function onHideFloatingElement (pluginOptions: PluginOptions) {
         })
       }
 
-      const floatingElement = options.floatingElement || pluginOptions.floatingElement
-  
-      if (!floatingElement) {
-        throw new Error('"floatingElement" is required')
-      }
-  
       const referenceElement = options.referenceElement || getSelectedElement(editor)
   
       if (!referenceElement) {
         throw new Error('"referenceElement" is empty')
+      }
+
+      const managerFloatingEl = floatingElementManager.get(referenceElement)
+      const floatingElement = managerFloatingEl || options.floatingElement || pluginOptions.floatingElement
+  
+      if (!floatingElement) {
+        throw new Error('"floatingElement" is required')
       }
 
       const stopAutoUpdate = autoUpdateManager.get(referenceElement)
