@@ -1,12 +1,13 @@
 import { logScope, showFloatingCommand, hideFloatingCommand } from './utils/constant'
 import { onShowFloatingElement, onHideFloatingElement } from './command'
 import { updateFloatingPosition, showFloatingElement, hideFloatingElement } from './utils/floating'
+import { floatingElementStore } from './utils/store'
 
 import type { Plugin, Component } from 'grapesjs'
 import type { PluginOptions, CommandOptions } from './types'
 
 const plugin: Plugin<PluginOptions> = (editor, options = {}) => {
-  const { hasSelectionTracked = false, floatingElement } = options
+  const { hasSelectionTracked = false } = options
   const editorCommands = editor.Commands
 
   editorCommands.add(showFloatingCommand, onShowFloatingElement(options))
@@ -16,9 +17,15 @@ const plugin: Plugin<PluginOptions> = (editor, options = {}) => {
     return
   }
 
-  if (!floatingElement) {
-    console.warn(`${logScope} "floatingElement" is required to track selection`)
-    return
+  const getFloatingElement = (element: HTMLElement) => {
+    const floatingEl = floatingElementStore.get(element)
+
+    if (!floatingEl) {
+      console.warn(`${logScope} "floatingEl" is required, run "${showFloatingCommand}" before`)
+      return
+    }
+
+    return floatingEl
   }
 
   editor.on('component:selected', (selectedComponent: Component) => {
@@ -28,9 +35,15 @@ const plugin: Plugin<PluginOptions> = (editor, options = {}) => {
       return
     }
 
+    const floatingEl = getFloatingElement(selectedEl)
+
+    if (!floatingEl) {
+      return
+    }
+
     const commandOptions: CommandOptions = {
       referenceElement: selectedEl,
-      floatingElement
+      floatingElement: floatingEl
     }
 
     editor.runCommand(showFloatingCommand, commandOptions)
@@ -43,16 +56,24 @@ const plugin: Plugin<PluginOptions> = (editor, options = {}) => {
       return
     }
 
+    const floatingEl = getFloatingElement(deselectedEl)
+
+    if (!floatingEl) {
+      return
+    }
+
     const commandOptions: CommandOptions = {
       referenceElement: deselectedEl,
-      floatingElement
+      floatingElement: floatingEl
     }
-  
+
     editor.runCommand(hideFloatingCommand, commandOptions)
   })
 }
 
 export default plugin
+
+export * from './types'
 
 // Utilities
 export {

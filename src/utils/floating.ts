@@ -70,7 +70,11 @@ export function showFloatingElement (referenceElement: HTMLElement, floatingElem
 
 export function hideFloatingElement (floatingElement: HTMLElement, stopAutoUpdate?: () => void) {
   try {
-    floatingElement.style.display = 'none'
+    const floatingStyle = window.getComputedStyle(floatingElement)
+
+    if (floatingStyle.display !== 'none') {
+      floatingElement.style.display = 'none'
+    }
 
     if (stopAutoUpdate) {
       stopAutoUpdate()
