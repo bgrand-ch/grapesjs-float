@@ -9,33 +9,37 @@ const plugin: Plugin<PluginOptions> = (editor, options = {}) => {
   const { hasSelectionTracked = true } = options
   const editorCommands = editor.Commands
 
-  editorCommands.add(showFloatingCommand, onShowFloatingElement)
-  editorCommands.add(hideFloatingCommand, onHideFloatingElement)
+  editorCommands.add(showFloatingCommand, onShowFloatingElement(options))
+  editorCommands.add(hideFloatingCommand, onHideFloatingElement(options))
 
   if (!hasSelectionTracked) {
     return
   }
 
-  editor.on('component:deselected', (deselectedComponent: Component) => {
-    const timeoutId = window.setTimeout(() => {
-      try {
-        const previousElement = deselectedComponent.getEl()
+  // editor.on('component:selected', (selectedComponent: Component) => {
 
-        if (!previousElement) {
-          return
-        }
+  // })
 
-        const commandOptions: CommandOptions = {
-          previousElement,
-          isDebugging: true
-        }
+  // editor.on('component:deselected', (deselectedComponent: Component) => {
+  //   const timeoutId = window.setTimeout(() => {
+  //     try {
+  //       const previousElement = deselectedComponent.getEl()
 
-        editorCommands.run(showFloatingCommand, commandOptions)
-      } finally {
-        window.clearTimeout(timeoutId)
-      }
-    }, 250)
-  })
+  //       if (!previousElement) {
+  //         return
+  //       }
+
+  //       const commandOptions: CommandOptions = {
+  //         previousElement,
+  //         isDebugging: true
+  //       }
+
+  //       editorCommands.run(showFloatingCommand, commandOptions)
+  //     } finally {
+  //       window.clearTimeout(timeoutId)
+  //     }
+  //   }, 250)
+  // })
 }
 
 export default plugin

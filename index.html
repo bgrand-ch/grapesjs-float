@@ -11,15 +11,21 @@
   </head>
   <body>
     <div id="editor">
-      <div data-gjs-type="text" style="max-width: 400px;">
+      <div style="display: flex; height: 400px;">
+        <div data-gjs-type="column" style="flex-grow: 1;">Col 1</div>
+        <div data-gjs-type="column" style="flex-grow: 1;">Col 2</div>
+        <div data-gjs-type="column" style="flex-grow: 1;">Col 3</div>
+      </div>
+
+      <div data-gjs-type="text">
         Insert your text here
       </div>
 
-      <div data-gjs-type="text" style="max-width: 800px;">
+      <div data-gjs-type="text">
         Insert your text here
       </div>
 
-      <div data-gjs-type="text" style="max-width: 1200px;">
+      <div data-gjs-type="text">
         Insert your text here
       </div>
     </div>
@@ -44,6 +50,8 @@
 
       #floating-element {
         display: none;
+        min-width: 250px;
+        min-height: 300px;
         padding: 8px;
         border-radius: 4px;
         background-color: white;
