@@ -1,93 +1,54 @@
 <template>
   <main>
     <div id="editor">
-      <div data-gjs-type="text" style="max-width: 600px;">
+      <div style="display: flex; height: 400px;">
+        <div data-gjs-type="column" data-gjs-resizable="true" style="flex-grow: 1;">Col 1</div>
+        <div data-gjs-type="column" data-gjs-resizable="true" style="flex-grow: 2;">Col 2</div>
+        <div data-gjs-type="column" data-gjs-resizable="true" style="flex-grow: 1;">Col 3</div>
+      </div>
+
+      <div data-gjs-type="text">
+        Insert your text here
+      </div>
+
+      <div data-gjs-type="text">
+        Insert your text here
+      </div>
+
+      <div data-gjs-type="text">
         Insert your text here
       </div>
     </div>
 
-    <v-card
-      v-show="showFloatingComponent"
-      ref="floatingComponent"
-      class="mx-auto"
-      min-width="300"
+    <div
+      v-show="floatingInfo"
+      ref="floatingEl"
+      class="floating-element"
     >
-      <v-card-item>
-        <v-card-title>
-          Floating element
-        </v-card-title>
-        <v-card-subtitle>
-          Test form reactivity.
-        </v-card-subtitle>
-      </v-card-item>
-
-      <v-card-text>
-        <v-text-field
-          v-model="form.firstName"
-          label="First name"
-          required
-          hide-details
-        ></v-text-field>
-
-        <v-text-field
-          v-model="form.lastName"
-          label="Last name"
-          required
-          hide-details
-        ></v-text-field>
-      </v-card-text>
-    </v-card>
+      {{ floatingInfo }}
+    </div>
   </main>
 </template>
 
 <script setup lang="ts">
 import 'grapesjs/dist/css/grapes.min.css'
 
-import { ref, shallowRef, reactive, watch, onMounted } from 'vue'
+import { ref, shallowRef, onMounted } from 'vue'
 import grapesjs, { usePlugin } from 'grapesjs'
 import grapesjsBlocks from 'grapesjs-blocks-basic'
 import grapesjsFloat from 'grapesjs-float'
 
-import type { ComponentPublicInstance } from 'vue'
-import type { Editor } from 'grapesjs'
+import { showFloatingCommand, hideFloatingCommand } from './utils/command'
+import { capitalizeValue } from './utils/string'
 
-const editor = ref<Editor|null>(null)
-const showFloatingComponent = ref(false)
-const floatingComponent = shallowRef<ComponentPublicInstance|null>(null)
-const form = reactive({
-  firstName: '',
-  lastName: ''
-})
+import type { Editor, Component } from 'grapesjs'
+import type { CommandOptions } from 'grapesjs-float'
 
-watch(form, value => {
-  console.log('Form updated', value)
-})
+const editor = shallowRef<Editor|null>(null)
+const floatingEl = shallowRef<HTMLElement|null>(null)
+const floatingInfo = ref<string>('')
 
-watch(showFloatingComponent, value => {
-  if (
-    !editor.value ||
-    !floatingComponent.value
-  ) {
-    return
-  }
-
-  const editorCommands = editor.value.Commands
-  const floatingElement = floatingComponent.value.$el
-
-  if (!value) {
-    editorCommands.run('float:hide-element', {
-      isDebugging: true
-    })
-    return
-  }
-
-  editorCommands.run('float:show-element', {
-    floatingElement,
-    isDebugging: true
-  })
-})
-
-onMounted(() => {
+onMounted(async () => {
   editor.value = grapesjs.init({
     container: '#editor',
     height: '100vh',
@@ -101,16 +62,95 @@ onMounted(() => {
     ]
   })
 
-  editor.value.on('load', () => {
+  editor.value.once('load', () => {
     console.log('Editor loaded', editor.value)
+  })
 
-    showFloatingComponent.value = true
+  // Show the floating element around the selected component.
+  editor.value.on('component:selected', (selectedComponent: Component) => {
+    const { type: componentType, name: componentName = '' } = selectedComponent.props()
+    const selectedEl = selectedComponent.getEl()
 
-    const tenSeconds = 10000
-    const timeoutId = window.setTimeout(() => {
-      showFloatingComponent.value = false
-      window.clearTimeout(timeoutId)
-    }, tenSeconds)
+    if (
+      !selectedEl ||
+      !floatingEl.value
+    ) {
+      return
+    }
+
+    const commandOptions: CommandOptions = {
+      referenceElement: selectedEl,
+      floatingElement: floatingEl.value
+    }
+
+    editor.value!.runCommand(showFloatingCommand, commandOptions)
+
+    const label = capitalizeValue(componentType) || componentName
+
+    floatingInfo.value = `${label} (styles, settings, ...)`
+  })
+
+  // Hide the floating element.
+  editor.value.on('component:deselected', (deselectedComponent: Component) => {
+    const deselectedEl = deselectedComponent.getEl()
+
+    if (
+      !deselectedEl ||
+      !floatingEl.value
+    ) {
+      return
+    }
+
+    const commandOptions: CommandOptions = {
+      referenceElement: deselectedEl,
+      floatingElement: floatingEl.value
+    }
+
+    editor.value!.runCommand(hideFloatingCommand, commandOptions)
+
+    floatingInfo.value = ''
+  })
+
+  // On floating element shown
+  editor.value.on(showFloatingCommand, (floatingElement, referenceElement) => {
+    console.log('Floating element is shown', {
+      floatingElement,
+      referenceElement
+    })
+  })
+
+  // On floating element hidden
+  editor.value.on(hideFloatingCommand, (floatingElement, referenceElement) => {
+    console.log('Floating element is hidden', {
+      floatingElement,
+      referenceElement
+    })
   })
 })
 </script>
+
+<style scoped>
+.floating-element {
+  min-width: 250px;
+  min-height: 300px;
+  padding: 8px;
+  border-radius: 4px;
+  background-color: white;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+}
+</style>
+
+<style>
+html, body {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline;
+}
+
+body {
+  line-height: 1;
+}
+</style>

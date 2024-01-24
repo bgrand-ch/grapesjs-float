@@ -17,7 +17,7 @@ import grapesjs from 'grapesjs'
 import grapesjsFloat from 'grapesjs-float'
 
 const pluginOptions = {
-  hasSelectionTracked: boolean // optional, default to true
+  floatingElement: HTMLElement // optional, if specified in "float:show-element" command options
 }
 const editor = grapesjs.init({
   // ...
@@ -37,8 +37,10 @@ const editor = grapesjs.init({
 import grapesjs, { usePlugin } from 'grapesjs'
 import grapesjsFloat from 'grapesjs-float'
 
-const pluginOptions = {
-  hasSelectionTracked: boolean // default to true
+import type { PluginOptions, CommandOptions } from 'grapesjs-float'
+
+const pluginOptions: PluginOptions = {
+  floatingElement: HTMLElement // optional, if specified in "float:show-element" command options
 }
 const editor = grapesjs.init({
   // ...
@@ -51,32 +53,67 @@ const editor = grapesjs.init({
 
 ## Commands
 
+```ts
+// Your reference HTML element.
+const selectedEl = editor.getSelected()?.getEl()
+
+// Your floating HTML element.
+const floatingEl = document.getElementById('floating-element')
+```
+
+> Full demonstration in the [`src/example.ts`](https://github.com/bgrand-ch/grapesjs-float/blob/main/src/example.ts) file.
+
 ### Show floating element
 
 ```ts
-const commandOptions = {
-  floatingElement: HTMLElement, // required, your floating html element ("display: none;", v-show, etc.)
-  referenceElement: HTMLElement // optional, selected component by default
+const commandOptions: CommandOptions = {
+  referenceElement: selectedEl, // optional, selected component by default
+  floatingElement: floatingEl // optional, if specified in the plugin options
 }
+
 editor.runCommand('float:show-element', commandOptions)
 ```
 
 ### Hide floating element
 
 ```ts
-const commandOptions = {
-  floatingElement: HTMLElement, // optional, your floating html element ("display: none;", v-show, etc.)
-  referenceElement: HTMLElement // optional, selected component by default
+const commandOptions: CommandOptions = {
+  referenceElement: selectedEl, // optional, selected component by default
+  floatingElement: floatingEl // optional, your floating html element by default
 }
+
 editor.runCommand('float:hide-element', commandOptions)
+```
+
+## Events
+
+### On floating element shown
+
+```ts
+editor.on('float:show-element', (floatingElement, referenceElement) => {
+  console.log('Floating element is shown', {
+    floatingElement,
+    referenceElement
+  })
+})
+```
+
+### On floating element hidden
+
+```ts
+editor.on('float:hide-element', (floatingElement, referenceElement) => {
+  console.log('Floating element is hidden', {
+    floatingElement,
+    referenceElement
+  })
+})
 ```
 
 ## Options
 
 ```ts
 {
-  // Floating element reference updated when a component is selected.
-  hasSelectionTracked: boolean // optional, default to true
+  floatingElement: HTMLElement // optional, if specified in "float:show-element" command options
 }
 ```
 

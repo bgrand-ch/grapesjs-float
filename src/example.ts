@@ -1,14 +1,27 @@
 // This file is only used by Vite during development.
 // It is ignored when the files are built.
+// It is an example, a demonstration.
 
 import 'grapesjs/dist/css/grapes.min.css'
 
 import grapesjs, { usePlugin } from 'grapesjs'
 import grapesjsBlocks from 'grapesjs-blocks-basic'
 import grapesjsFloat from './plugin'
-import { showFloatingCommand } from './utils/constant'
+import { showFloatingCommand, hideFloatingCommand } from './utils/constant'
 
+import type { Component } from 'grapesjs'
 import type { CommandOptions } from './types'
+
+function capitalizeValue (value?: string) {
+  if (typeof value !== 'string') {
+    return ''
+  }
+
+  return (
+    value.charAt(0).toUpperCase() +
+    value.replace(/[_-]+/, ' ').slice(1)
+  )
+}
 
 function runExample () {
   const editor = grapesjs.init({
@@ -23,29 +36,51 @@ function runExample () {
       usePlugin(grapesjsFloat)
     ]
   })
+  const floatingEl = document.getElementById('floating-element')!
 
-  const getElement = (textContent: string) => {
-    const divElement = document.getElementById('element') as HTMLDivElement
-    divElement.textContent = textContent
+  editor.once('load', () => {
+    console.log('Editor loaded', editor)
+  })
 
-    return divElement
-  }
+  // Show the floating element around the selected component.
+  editor.on('component:selected', (selectedComponent: Component) => {
+    const { type: componentType, name: componentName = '' } = selectedComponent.props()
+    const selectedEl = selectedComponent.getEl()
 
-  const showFloatingElement = (floatingElement: HTMLElement) => {
-    const editorCommands = editor.Commands
+    if (!selectedEl) {
+      return
+    }
+
     const commandOptions: CommandOptions = {
-      floatingElement,
+      referenceElement: selectedEl,
+      floatingElement: floatingEl,
       isDebugging: true
     }
 
-    editorCommands.run(showFloatingCommand, commandOptions)
-  }
+    editor.runCommand(showFloatingCommand, commandOptions)
 
-  editor.on('load', () => {
-    console.log('Editor loaded', editor)
+    const label = capitalizeValue(componentType) || componentName
 
-    const element = getElement('Floating element (auto update)')
-    showFloatingElement(element)
+    floatingEl.textContent = `${label} (styles, settings, ...)`
+  })
+
+  // Hide the floating element.
+  editor.on('component:deselected', (deselectedComponent: Component) => {
+    const deselectedEl = deselectedComponent.getEl()
+
+    if (!deselectedEl) {
+      return
+    }
+
+    const commandOptions: CommandOptions = {
+      referenceElement: deselectedEl,
+      floatingElement: floatingEl,
+      isDebugging: true
+    }
+  
+    editor.runCommand(hideFloatingCommand, commandOptions)
+
+    floatingEl.textContent = ''
   })
 }
 
