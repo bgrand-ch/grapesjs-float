@@ -5,6 +5,5 @@ export type CommandOptions = {
 }
 
 export type PluginOptions = {
-  hasSelectionTracked?: boolean
   floatingElement?: HTMLElement
 }
