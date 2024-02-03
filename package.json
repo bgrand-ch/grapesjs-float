@@ -1,7 +1,7 @@
 {
   "type": "module",
   "name": "grapesjs-float",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "GrapesJS float plugin with Floating UI",
   "author": "Benjamin Grand",
   "license": "BSD-3-Clause",
@@ -23,11 +23,11 @@
     "prepare": "pnpm run build"
   },
   "devDependencies": {
-    "@floating-ui/dom": "1.5.4",
+    "@floating-ui/dom": "1.6.1",
     "grapesjs": "0.21.8",
     "grapesjs-blocks-basic": "1.0.2",
     "vite": "5.0.12",
-    "vite-plugin-dts": "3.7.1"
+    "vite-plugin-dts": "3.7.2"
   },
   "peerDependencies": {
     "@floating-ui/dom": ">= 1.5.3",

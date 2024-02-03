@@ -7,3 +7,8 @@ export type CommandOptions = {
 export type PluginOptions = {
   floatingElement?: HTMLElement
 }
+
+export type Store = {
+  floatingElement?: HTMLElement,
+  stopAutoUpdate?: () => void
+}

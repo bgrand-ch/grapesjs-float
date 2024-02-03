@@ -1,10 +1,11 @@
 import { logScope, showFloatingCommand, hideFloatingCommand } from './utils/constant'
 import { showFloatingElement, hideFloatingElement } from './utils/floating'
-import { floatingElementStore, autoUpdateStore } from './utils/store'
 import { getSelectedElement } from './utils/element'
 
 import type { Editor } from 'grapesjs'
-import type { PluginOptions, CommandOptions } from './types'
+import type { PluginOptions, CommandOptions, Store } from './types'
+
+const store: Store = {}
 
 export function onShowFloatingElement (pluginOptions: PluginOptions) {
   return (editor: Editor, sender: unknown, options: CommandOptions) => {
@@ -32,20 +33,16 @@ export function onShowFloatingElement (pluginOptions: PluginOptions) {
         throw new Error('"floatingElement" is required')
       }
 
-      const currStopAutoUpdate = autoUpdateStore.get(referenceElement)
-
-      if (currStopAutoUpdate) {
-        currStopAutoUpdate()
+      if (store.stopAutoUpdate) {
+        store.stopAutoUpdate()
       }
 
-      const stopAutoUpdate = showFloatingElement(referenceElement, floatingElement)
+      store.floatingElement = floatingElement
+      store.stopAutoUpdate = showFloatingElement(referenceElement, floatingElement)
 
-      if (!stopAutoUpdate) {
+      if (!store.stopAutoUpdate) {
         throw new Error('"stopAutoUpdate" is empty')
       }
-
-      floatingElementStore.set(referenceElement, floatingElement)
-      autoUpdateStore.set(referenceElement, stopAutoUpdate)
 
       editor.trigger(showFloatingCommand, floatingElement, referenceElement)
     } catch (err) {
@@ -75,19 +72,16 @@ export function onHideFloatingElement (pluginOptions: PluginOptions) {
         throw new Error('"referenceElement" is empty')
       }
 
-      const managerFloatingEl = floatingElementStore.get(referenceElement)
-      const floatingElement = managerFloatingEl || options.floatingElement || pluginOptions.floatingElement
+      const floatingElement = store.floatingElement || options.floatingElement || pluginOptions.floatingElement
 
       if (!floatingElement) {
         throw new Error('"floatingElement" is required')
       }
 
-      const stopAutoUpdate = autoUpdateStore.get(referenceElement)
+      hideFloatingElement(floatingElement, store.stopAutoUpdate)
 
-      hideFloatingElement(floatingElement, stopAutoUpdate)
-
-      floatingElementStore.delete(referenceElement)
-      autoUpdateStore.delete(referenceElement)
+      delete store.floatingElement
+      delete store.stopAutoUpdate
 
       editor.trigger(hideFloatingCommand, floatingElement, referenceElement)
     } catch (err) {
