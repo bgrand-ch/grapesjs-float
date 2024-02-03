@@ -7,6 +7,15 @@ import type { PluginOptions, CommandOptions, Store } from './types'
 
 const store: Store = {}
 
+function resetStore () {
+  if (store.stopAutoUpdate) {
+    store.stopAutoUpdate()
+  }
+
+  delete store.floatingElement
+  delete store.stopAutoUpdate
+}
+
 export function onShowFloatingElement (pluginOptions: PluginOptions) {
   return (editor: Editor, sender: unknown, options: CommandOptions) => {
     try {
@@ -48,6 +57,8 @@ export function onShowFloatingElement (pluginOptions: PluginOptions) {
     } catch (err) {
       const { message } = err as Error
       console.warn(`${logScope} onShowFloatingElement - ${message}`)
+
+      resetStore()
     }
   }
 }
@@ -72,21 +83,25 @@ export function onHideFloatingElement (pluginOptions: PluginOptions) {
         throw new Error('"referenceElement" is empty')
       }
 
-      const floatingElement = store.floatingElement || options.floatingElement || pluginOptions.floatingElement
+      let floatingElement = options.floatingElement || pluginOptions.floatingElement
+
+      // Is the stored floating element currently in the dom?
+      if (store.floatingElement?.isConnected === true) {
+        floatingElement = store.floatingElement
+      }
 
       if (!floatingElement) {
         throw new Error('"floatingElement" is required')
       }
 
-      hideFloatingElement(floatingElement, store.stopAutoUpdate)
-
-      delete store.floatingElement
-      delete store.stopAutoUpdate
+      hideFloatingElement(floatingElement)
 
       editor.trigger(hideFloatingCommand, floatingElement, referenceElement)
     } catch (err) {
       const { message } = err as Error
       console.warn(`${logScope} onHideFloatingElement - ${message}`)
+    } finally {
+      resetStore()
     }
   }
 }
