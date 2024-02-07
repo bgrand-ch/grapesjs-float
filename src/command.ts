@@ -1,20 +1,11 @@
 import { logScope, showFloatingCommand, hideFloatingCommand } from './utils/constant'
 import { showFloatingElement, hideFloatingElement } from './utils/floating'
 import { getSelectedElement } from './utils/element'
+import { getStoreValue, addStoreValue, resetStore } from './utils/store'
+import { hasAvailableElement } from './utils/element'
 
 import type { Editor } from 'grapesjs'
-import type { PluginOptions, CommandOptions, Store } from './types'
-
-const store: Store = {}
-
-function resetStore () {
-  if (store.stopAutoUpdate) {
-    store.stopAutoUpdate()
-  }
-
-  delete store.floatingElement
-  delete store.stopAutoUpdate
-}
+import type { PluginOptions, CommandOptions } from './types'
 
 export function onShowFloatingElement (pluginOptions: PluginOptions) {
   return (editor: Editor, sender: unknown, options: CommandOptions) => {
@@ -32,26 +23,38 @@ export function onShowFloatingElement (pluginOptions: PluginOptions) {
 
       const referenceElement = options.referenceElement || getSelectedElement(editor)
 
-      if (!referenceElement) {
+      if (
+        !referenceElement ||
+        !hasAvailableElement(referenceElement)
+      ) {
         throw new Error('"referenceElement" is empty')
       }
 
       const floatingElement = options.floatingElement || pluginOptions.floatingElement
 
-      if (!floatingElement) {
+      if (
+        !floatingElement ||
+        !hasAvailableElement(floatingElement)
+      ) {
         throw new Error('"floatingElement" is required')
       }
+
+      const store = getStoreValue()
 
       if (store.stopAutoUpdate) {
         store.stopAutoUpdate()
       }
 
-      store.floatingElement = floatingElement
-      store.stopAutoUpdate = showFloatingElement(referenceElement, floatingElement)
+      const stopAutoUpdate = showFloatingElement(referenceElement, floatingElement)
 
-      if (!store.stopAutoUpdate) {
+      if (!stopAutoUpdate) {
         throw new Error('"stopAutoUpdate" is empty')
       }
+
+      addStoreValue({
+        floatingElement,
+        stopAutoUpdate
+      })
 
       editor.trigger(showFloatingCommand, floatingElement, referenceElement)
     } catch (err) {
@@ -79,18 +82,26 @@ export function onHideFloatingElement (pluginOptions: PluginOptions) {
 
       const referenceElement = options.referenceElement || getSelectedElement(editor)
 
-      if (!referenceElement) {
+      if (
+        !referenceElement ||
+        !hasAvailableElement(referenceElement)
+      ) {
         throw new Error('"referenceElement" is empty')
       }
+
+      const store = getStoreValue()
 
       let floatingElement = options.floatingElement || pluginOptions.floatingElement
 
       // Is the stored floating element currently in the dom?
-      if (store.floatingElement?.isConnected === true) {
+      if (store.floatingElement) {
         floatingElement = store.floatingElement
       }
 
-      if (!floatingElement) {
+      if (
+        !floatingElement ||
+        !hasAvailableElement(floatingElement)
+      ) {
         throw new Error('"floatingElement" is required')
       }
 

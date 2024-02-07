@@ -1,5 +1,7 @@
 import { autoUpdate, computePosition, offset, autoPlacement, shift } from '@floating-ui/dom'
 import { logScope } from './constant'
+import { hasAvailableElement } from './element'
+import { resetStore } from './store'
 
 import type { ComputePositionConfig } from '@floating-ui/dom'
 
@@ -17,6 +19,14 @@ export function updateFloatingPosition (referenceElement: HTMLElement, floatingE
   }
 
   return () => {
+    if (
+      !floatingElement ||
+      !hasAvailableElement(floatingElement)
+    ) {
+      resetStore()
+      return
+    }
+
     computePosition(referenceElement, floatingElement, positionConfig).then(({ x, y }) => {
       floatingElement.style.left = `${x}px`
       floatingElement.style.top = `${y}px`
