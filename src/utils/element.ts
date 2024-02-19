@@ -9,7 +9,7 @@ export function getSelectedElement (editor: Editor) {
   const wrapperComponent = editor.getWrapper()
 
   if (!selectedComponent && wrapperComponent) {
-    editor.select(wrapperComponent)
+    // editor.select(wrapperComponent)
     return wrapperComponent.getEl()
   }
 
